@@ -109,7 +109,7 @@ fun DashboardScreen(vm: AppViewModel, nav: NavController) {
             }
 
             item { SectionHeader("Accounts") }
-            items(data.activeAccounts, key = { it.id }) { acc ->
+            items(data.activeAccounts, key = { "acc-${it.id}" }) { acc ->
                 Row(
                     Modifier.fillMaxWidth().clickable { nav.navigate(Routes.accountDetail(acc.id)) }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -140,7 +140,7 @@ fun DashboardScreen(vm: AppViewModel, nav: NavController) {
             if (catSummaries.isEmpty()) {
                 item { EmptyHint("No spending in this period") }
             }
-            items(catSummaries, key = { it.category.id }) { cs ->
+            items(catSummaries, key = { "cat-${it.category.id}" }) { cs ->
                 CategorySummaryRow(cs) {
                     vm.setFilter(TxFilter(categoryId = cs.category.id, title = cs.category.name))
                     nav.navigate(Routes.TRANSACTIONS)
@@ -148,7 +148,7 @@ fun DashboardScreen(vm: AppViewModel, nav: NavController) {
             }
 
             item { SectionHeader("Recent transactions") }
-            items(recent, key = { it.tx.id }) { ui ->
+            items(recent, key = { "tx-${it.tx.id}" }) { ui ->
                 TransactionRow(ui) { nav.navigate(Routes.txDetail(ui.tx.id)) }
             }
             item { androidx.compose.foundation.layout.Spacer(Modifier.size(80.dp)) }

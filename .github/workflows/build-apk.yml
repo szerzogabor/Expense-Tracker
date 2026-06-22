@@ -3,7 +3,7 @@ name: Build APK
 on:
   push:
     branches:
-      - claude/fix-recurring-crash
+      - claude/fix-expense-crash
       - main
     paths-ignore:
       - 'dist/**'
