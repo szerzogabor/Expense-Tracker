@@ -1,0 +1,21 @@
+# Gradle / build
+.gradle/
+build/
+app/build/
+local.properties
+
+# Android Studio / IDE
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keep the Gradle wrapper jar tracked (needed by CI):
+!gradle/wrapper/gradle-wrapper.jar
+
+# OS
+.DS_Store
+
+# Keep the committed APK output (CI writes it):
+!dist/expense-tracker.apk
