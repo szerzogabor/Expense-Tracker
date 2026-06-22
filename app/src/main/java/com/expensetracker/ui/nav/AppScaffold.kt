@@ -44,6 +44,7 @@ import com.expensetracker.ui.screens.RecurringEditScreen
 import com.expensetracker.ui.screens.RecurringListScreen
 import com.expensetracker.ui.screens.ReportsScreen
 import com.expensetracker.ui.screens.SettingsScreen
+import com.expensetracker.ui.screens.TagsScreen
 import com.expensetracker.ui.screens.TransactionDetailScreen
 import com.expensetracker.ui.screens.TransactionEditScreen
 import com.expensetracker.ui.screens.TransactionsScreen
