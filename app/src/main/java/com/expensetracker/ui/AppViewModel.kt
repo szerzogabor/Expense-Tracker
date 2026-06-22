@@ -50,9 +50,11 @@ class AppViewModel(
 
     init {
         viewModelScope.launch {
-            repository.ensureSeed()
-            val n = repository.generateDue()
-            if (n > 0) message.value = "Generated $n recurring transaction(s)"
+            runCatching {
+                repository.ensureSeed()
+                val n = repository.generateDue()
+                if (n > 0) message.value = "Generated $n recurring transaction(s)"
+            }.onFailure { message.value = "Startup warning: ${it.message}" }
         }
     }
 

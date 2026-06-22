@@ -3,7 +3,7 @@ name: Build APK
 on:
   push:
     branches:
-      - claude/avast-mitigation
+      - claude/fix-recurring-crash
       - main
     paths-ignore:
       - 'dist/**'

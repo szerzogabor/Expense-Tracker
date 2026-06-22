@@ -284,31 +284,36 @@ class Repository(private val db: AppDatabase) {
         val todayEpoch = today.toEpochDay()
         var generated = 0
         for (rule in recurDao.getAll()) {
-            if (!rule.enabled) continue
-            val from = (rule.lastGeneratedDate?.plus(1)) ?: rule.startDate
-            val to = minOf(todayEpoch, rule.endDate ?: todayEpoch)
-            if (to < from) continue
-            val exceptions = recurDao.getExceptions(rule.id).map { it.date }.toSet()
-            val occ = RecurrenceEngine.occurrencesBetween(rule.rrule, rule.startDate, from, to, exceptions)
-            for (ep in occ) {
-                val form = TransactionForm(
-                    type = rule.type,
-                    amountMinor = rule.amountMinor,
-                    description = rule.description,
-                    date = ep,
-                    accountId = rule.accountId,
-                    destAccountId = rule.destAccountId,
-                    categoryId = rule.categoryId,
-                    note = rule.note,
-                    tagNames = rule.templateTags.split(",").map { it.trim() }.filter { it.isNotEmpty() },
-                    isPending = rule.generationMode == GenerationMode.PENDING,
-                    recurringRuleId = rule.id,
-                    occurrenceDate = ep,
-                )
-                saveTransaction(form)
-                generated++
+            // Guard each rule so a single bad rule can never crash the app on startup.
+            try {
+                if (!rule.enabled) continue
+                val from = (rule.lastGeneratedDate?.plus(1)) ?: rule.startDate
+                val to = minOf(todayEpoch, rule.endDate ?: todayEpoch)
+                if (to < from) continue
+                val exceptions = recurDao.getExceptions(rule.id).map { it.date }.toSet()
+                val occ = RecurrenceEngine.occurrencesBetween(rule.rrule, rule.startDate, from, to, exceptions)
+                for (ep in occ) {
+                    val form = TransactionForm(
+                        type = rule.type,
+                        amountMinor = rule.amountMinor,
+                        description = rule.description,
+                        date = ep,
+                        accountId = rule.accountId,
+                        destAccountId = rule.destAccountId,
+                        categoryId = rule.categoryId,
+                        note = rule.note,
+                        tagNames = rule.templateTags.split(",").map { it.trim() }.filter { it.isNotEmpty() },
+                        isPending = rule.generationMode == GenerationMode.PENDING,
+                        recurringRuleId = rule.id,
+                        occurrenceDate = ep,
+                    )
+                    saveTransaction(form)
+                    generated++
+                }
+                recurDao.update(rule.copy(lastGeneratedDate = to))
+            } catch (t: Throwable) {
+                // Skip this rule; keep the app running.
             }
-            recurDao.update(rule.copy(lastGeneratedDate = to))
         }
         return generated
     }
