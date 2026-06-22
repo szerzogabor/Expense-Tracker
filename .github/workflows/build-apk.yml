@@ -3,7 +3,7 @@ name: Build APK
 on:
   push:
     branches:
-      - claude/great-volta-y6hsj7
+      - claude/avast-mitigation
       - main
     paths-ignore:
       - 'dist/**'
@@ -50,19 +50,46 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace --no-daemon
 
-      - name: Copy APK to dist
+      - name: Copy APK to dist and compute checksum
         run: |
           mkdir -p dist
           cp app/build/outputs/apk/release/app-release.apk dist/expense-tracker.apk
+          sha256sum dist/expense-tracker.apk | awk '{print $1}' > dist/expense-tracker.apk.sha256
+          echo "SHA256=$(cat dist/expense-tracker.apk.sha256)" >> "$GITHUB_ENV"
+          echo "SHA-256: $(cat dist/expense-tracker.apk.sha256)"
 
       - name: Commit APK back to the repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f dist/expense-tracker.apk
+          git add -f dist/expense-tracker.apk dist/expense-tracker.apk.sha256
           if git diff --cached --quiet; then
             echo "APK unchanged; nothing to commit."
           else
             git commit -m "ci: build expense-tracker.apk [skip ci]"
             git push origin HEAD:${{ github.ref_name }}
+          fi
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v1.0.${{ github.run_number }}"
+          NOTES="Offline-first Expense Tracker — installable APK.
+
+          **SHA-256:** \`${SHA256}\`
+
+          Verify after download:
+          \`\`\`
+          sha256sum expense-tracker.apk
+          \`\`\`
+          The app requests **no permissions** (not even internet) and stores all data locally.
+          Signed with a stable key, so updates install over previous versions."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/expense-tracker.apk dist/expense-tracker.apk.sha256 --clobber
+          else
+            gh release create "$TAG" dist/expense-tracker.apk dist/expense-tracker.apk.sha256 \
+              --title "Expense Tracker $TAG" \
+              --notes "$NOTES" \
+              --latest
           fi
