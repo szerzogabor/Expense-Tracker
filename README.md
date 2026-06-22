@@ -18,20 +18,34 @@ and Room. See [`APP.md`](APP.md) for the full product requirements.
   including this / this-and-future / all edit scopes
 
 ## Install on your phone
-The signed APK is committed to this repo at:
 
-```
-dist/expense-tracker.apk
-```
+**Recommended — from Releases (with checksum):**
 
-1. On your phone, open this file on GitHub and tap **Download** (use the
-   "Download raw file" button).
+1. On your phone open the [**latest release**](../../releases/latest) and download
+   `expense-tracker.apk`.
 2. Open the downloaded file. Android will ask to allow installing apps from this
    source — enable it, then tap **Install**.
 3. Launch **Expense Tracker**.
 
+The APK is also committed at `dist/expense-tracker.apk` and its SHA-256 at
+`dist/expense-tracker.apk.sha256`. To verify integrity after download:
+
+```
+sha256sum expense-tracker.apk   # compare with the value in the release notes
+```
+
 > The APK is signed with a stable key committed in `keystore/release.jks`, so
 > new builds install **over** the previous version without uninstalling.
+
+### Antivirus / Play Protect "suspicious" warning
+This is a **false positive** common to sideloaded, self-signed apps from outside
+the Play Store — it has nothing to do with the app being unsafe. In fact the app
+requests **no permissions at all** (not even internet), so it cannot send data
+anywhere; the source is public and the build is reproducible. If your antivirus
+(e.g. Avast) or Play Protect flags it, you can safely allow it, or report it as a
+false positive (e.g. <https://www.avast.com/false-positive-file-form.php>).
+Distribution via a GitHub Release + published checksum and a properly-identified
+signing certificate reduce these warnings over time.
 
 ## How it's built
 This repo can't build Android locally in every environment (Google's Maven/SDK
